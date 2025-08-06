@@ -1,0 +1,14 @@
+abnormal_event_stat 网络异常事件统计
+alarm_count_stat 报警次数
+alert_region_stat 境内外报警排名
+asset_list 资产列表
+asset_stat 资产情况
+attack_flyline 实时攻击监测
+outbound_ip_stat 外联IP统计
+risk_score 风险评分
+security_event 安全事件
+vulnerability_fix_stat 漏洞修复情况
+vulnerability_record 漏洞情况列表
+vulnerability_stat 漏洞分布情况
+duty_schedule 值班列表
+device_stat 设备总览

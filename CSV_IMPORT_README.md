@@ -1,145 +1,109 @@
-# CSV文件导入功能说明
+# CSV导入功能修改说明
 
-## 功能概述
+## 修改概述
 
-本项目新增了CSV文件读取和导入数据库的功能，主要包含以下特性：
+本次修改主要针对CSV导入逻辑进行了优化，使其支持不包含`id`、`created_at`和`updated_at`列的CSV文件导入。
 
-1. **CSV文件读取** - 解析CSV文件内容，提取表头和数据
-2. **CSV数据导入** - 将CSV数据导入到指定的数据库中
-3. **自动建表** - 根据CSV表头自动创建数据库表
-4. **数据验证** - 验证CSV文件格式和数据库连接
+## 主要修改内容
 
-## 数据库交互代码位置
+### 1. CsvServiceImpl.java 修改
 
-### 1. Repository层（数据访问层）
-- **位置**: `eladmin-system/src/main/java/me/zhengjie/modules/*/repository/`
-- **主要文件**:
-  - `DatabaseRepository.java` - 数据库管理
-  - `UserRepository.java` - 用户管理
-  - `DictRepository.java` - 字典管理
+**文件位置**: `eladmin-system/src/main/java/me/zhengjie/modules/csv/service/impl/CsvServiceImpl.java`
 
-### 2. Service层（业务逻辑层）
-- **位置**: `eladmin-system/src/main/java/me/zhengjie/modules/*/service/`
-- **主要文件**:
-  - `DatabaseServiceImpl.java` - 数据库服务实现（包含CSV处理逻辑）
-  - `UserServiceImpl.java` - 用户服务实现
+**修改内容**:
+- 在`importCsv`方法中添加了字段过滤逻辑
+- 自动过滤掉`id`、`created_at`、`updated_at`字段（大小写不敏感）
+- 在SQL插入语句中自动添加`created_at`和`updated_at`字段
+- 使用系统当前时间作为这两个字段的默认值
+- `id`字段由数据库自增处理
 
-### 3. Controller层（控制层）
-- **位置**: `eladmin-system/src/main/java/me/zhengjie/modules/*/rest/`
-- **主要文件**:
-  - `DatabaseController.java` - 数据库管理接口（包含CSV处理接口）
-
-## 新增的CSV处理功能
-
-### 1. CsvUtils工具类
-**位置**: `eladmin-system/src/main/java/me/zhengjie/modules/maint/util/CsvUtils.java`
-
-**主要方法**:
-- `readCsvFile(MultipartFile file)` - 读取CSV文件内容
-- `parseCsvLine(String line)` - 解析CSV行数据
-- `parseCsvFile(MultipartFile file)` - 解析CSV文件为二维数组
-- `validateCsvFile(MultipartFile file)` - 验证CSV文件格式
-- `getHeaders(MultipartFile file)` - 获取CSV文件表头
-- `getDataRows(MultipartFile file)` - 获取CSV文件数据行
-
-### 2. 数据库服务扩展
-**位置**: `eladmin-system/src/main/java/me/zhengjie/modules/maint/service/DatabaseService.java`
-
-**新增方法**:
-- `readCsvFile(MultipartFile file)` - 读取CSV文件并解析内容
-- `importCsvToDatabase(MultipartFile file, String databaseId, String tableName)` - 将CSV数据导入到指定数据库
-
-### 3. API接口
-**位置**: `eladmin-system/src/main/java/me/zhengjie/modules/maint/rest/DatabaseController.java`
-
-**新增接口**:
-- `POST /api/database/readCsv` - 读取CSV文件
-- `POST /api/database/importCsv` - 导入CSV数据到数据库
-
-## 使用方法
-
-### 1. 读取CSV文件
-
-**请求**:
-```http
-POST /api/database/readCsv
-Content-Type: multipart/form-data
-
-file: [CSV文件]
-```
-
-**响应**:
-```json
-{
-  "success": true,
-  "headers": ["姓名", "年龄", "城市", "职业"],
-  "data": [
-    ["张三", "25", "北京", "工程师"],
-    ["李四", "30", "上海", "设计师"]
-  ],
-  "totalRows": 2,
-  "totalColumns": 4
+**关键代码片段**:
+```java
+// 过滤掉id、created_at、updated_at字段，这些字段由数据库自动处理
+List<String> excludeFields = Arrays.asList("id", "created_at", "updated_at");
+List<String> columns = new ArrayList<>();
+for (String col : data.get(0).keySet()) {
+    if (!excludeFields.contains(col.toLowerCase())) {
+        columns.add(col);
+    }
 }
+
+// 添加时间字段到列名中
+List<String> allColumns = new ArrayList<>(columns);
+allColumns.add("created_at");
+allColumns.add("updated_at");
+
+// 添加时间字段的默认值
+String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+// 在每行数据后添加时间值
+values.add("'" + currentTime + "'");
+values.add("'" + currentTime + "'");
 ```
 
-### 2. 导入CSV数据到数据库
+### 2. CsvUtils.java 修改
 
-**请求**:
-```http
-POST /api/database/importCsv
-Content-Type: multipart/form-data
+**文件位置**: `eladmin-system/src/main/java/me/zhengjie/modules/csv/util/CsvUtils.java`
 
-file: [CSV文件]
-databaseId: [数据库ID]
-tableName: [目标表名]
+**修改内容**:
+- 在`getHeaders`方法中添加字段过滤逻辑
+- 在`previewRows`方法中添加字段过滤逻辑
+- 确保预览功能也正确过滤这些字段
+
+**关键代码片段**:
+```java
+// 过滤掉id、created_at、updated_at字段，这些字段由数据库自动处理
+List<String> excludeFields = Arrays.asList("id", "created_at", "updated_at");
+headers.removeIf(header -> excludeFields.contains(header.toLowerCase()));
 ```
 
-**响应**:
-```json
-{
-  "success": true,
-  "message": "导入成功，共导入 4 条数据",
-  "totalRows": 4,
-  "successRows": 4
-}
-```
+## 功能特点
 
-## CSV文件格式要求
+### 1. 自动字段过滤
+- 系统会自动识别并过滤掉CSV文件中的`id`、`created_at`、`updated_at`字段
+- 过滤是大小写不敏感的，支持`ID`、`CREATED_AT`、`UPDATED_AT`等大写形式
 
-1. **文件格式**: 必须是.csv文件
-2. **编码**: UTF-8编码
-3. **分隔符**: 逗号(,)
-4. **引号处理**: 支持双引号转义
-5. **表头**: 第一行作为表头
-6. **数据行**: 从第二行开始为数据
+### 2. 自动时间处理
+- `created_at`和`updated_at`字段会自动使用系统当前时间
+- 时间格式为：`yyyy-MM-dd HH:mm:ss`
 
-## 示例CSV文件
+### 3. 数据库自增ID
+- `id`字段由数据库自动生成，无需在CSV中包含
 
+## 使用示例
+
+### CSV文件格式示例
 ```csv
-姓名,年龄,城市,职业
-张三,25,北京,工程师
-李四,30,上海,设计师
-王五,28,广州,产品经理
-赵六,35,深圳,销售经理
+name,age,email,department
+张三,25,zhangsan@example.com,技术部
+李四,30,lisi@example.com,市场部
+王五,28,wangwu@example.com,人事部
 ```
+
+### 导入后的数据库记录
+```sql
+-- 假设表名为 employees
+INSERT INTO employees (name, age, email, department, created_at, updated_at) VALUES 
+('张三', '25', 'zhangsan@example.com', '技术部', '2024-01-15 10:30:00', '2024-01-15 10:30:00'),
+('李四', '30', 'lisi@example.com', '市场部', '2024-01-15 10:30:00', '2024-01-15 10:30:00'),
+('王五', '28', 'wangwu@example.com', '人事部', '2024-01-15 10:30:00', '2024-01-15 10:30:00');
+```
+
+## 测试
+
+创建了测试文件 `CsvImportTest.java` 来验证修改的正确性，包括：
+- 字段过滤功能测试
+- 预览功能测试  
+- 大小写不敏感过滤测试
+
+## 兼容性
+
+- 向后兼容：如果CSV文件中不包含这些字段，导入功能正常工作
+- 向前兼容：如果CSV文件中包含这些字段，会被自动过滤掉
+- 大小写兼容：支持各种大小写形式的字段名
 
 ## 注意事项
 
-1. **数据库连接**: 导入前会验证数据库连接
-2. **表名规范**: 表名会自动处理特殊字符
-3. **列名规范**: 列名会自动清理特殊字符
-4. **数据类型**: 所有字段默认创建为VARCHAR(255)
-5. **错误处理**: 详细的错误信息会返回给客户端
-
-## 权限要求
-
-- 读取CSV文件: `database:add` 权限
-- 导入CSV数据: `database:add` 权限
-
-## 技术实现
-
-1. **文件处理**: 使用Java IO流读取CSV文件
-2. **数据解析**: 自定义CSV解析器，支持引号转义
-3. **SQL生成**: 动态生成建表和插入SQL
-4. **数据库操作**: 使用Druid连接池执行SQL
-5. **错误处理**: 完善的异常处理和日志记录 
+1. 确保目标数据库表有`created_at`和`updated_at`字段
+2. 确保`id`字段设置为自增
+3. 时间字段的格式为`DATETIME`类型
+4. 如果CSV中包含其他时间相关字段，不会被自动处理，需要手动指定 

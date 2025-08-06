@@ -115,6 +115,34 @@ public class AuthController {
         return ResponseEntity.ok(authInfo);
     }
 
+    @Log("大屏免登录")
+    @ApiOperation("大屏免登录")
+    @AnonymousPostMapping(value = "/screen-login")
+    public ResponseEntity<Object> screenLogin(HttpServletRequest request) throws Exception {
+        // 指定大屏账号用户名
+        String screenUsername = "screen";
+        // 获取用户信息
+        JwtUserDto jwtUser = userDetailsService.loadUserByUsername(screenUsername);
+        // 直接认证
+        Authentication authentication = new UsernamePasswordAuthenticationToken(jwtUser, null, jwtUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 生成令牌
+        String token = tokenProvider.createToken(jwtUser);
+        // 返回 token 与 用户信息
+        Map<String, Object> authInfo = new HashMap<String, Object>(2) {{
+            put("token", properties.getTokenStartWith() + token);
+            put("user", jwtUser);
+        }};
+        if (loginProperties.isSingleLogin()) {
+            // 踢掉之前已经登录的token
+            onlineUserService.kickOutForUsername(screenUsername);
+        }
+        // 保存在线信息
+        onlineUserService.save(jwtUser, token, request);
+        // 返回登录信息
+        return ResponseEntity.ok(authInfo);
+    }
+
     @ApiOperation("获取用户信息")
     @GetMapping(value = "/info")
     public ResponseEntity<UserDetails> getUserInfo() {

@@ -1,0 +1,168 @@
+CREATE TABLE alarm_count_stat (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    stat_date DATE NOT NULL COMMENT '统计日期（按日）',
+    stat_year INT NOT NULL COMMENT '统计年份',
+    stat_quarter TINYINT NOT NULL CHECK (stat_quarter BETWEEN 1 AND 4) COMMENT '统计季度',
+
+    success_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '成功告警次数',
+    suspicious_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '可疑告警次数',
+    attempt_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '尝试告警次数',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    UNIQUE KEY uniq_date (stat_date),
+    INDEX idx_year_quarter (stat_year, stat_quarter),
+    INDEX idx_stat_date (stat_date)
+) COMMENT='每日告警次数统计表';
+CREATE TABLE asset_stat (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    stat_date DATE NOT NULL COMMENT '统计日期',
+
+    network_device INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '网络设备数量',
+    security_device INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '安全设备数量',
+    domain_name INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '域名数量',
+    middleware INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '中间件数量',
+    service INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '服务数量',
+    application INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '应用数量',
+    website INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '网站数量',
+    virtual_device INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '虚拟设备数量',
+    port INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '端口数量',
+    host INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '主机数量',
+    database_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '数据库数量',
+    os_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '操作系统数量',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    UNIQUE KEY uniq_stat_date (stat_date)
+) COMMENT='资产情况统计表';
+CREATE TABLE duty_schedule (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    org_name VARCHAR(100) NOT NULL COMMENT '单位名称',
+    leader_name VARCHAR(50) NOT NULL COMMENT '带班领导姓名',
+    leader_phone VARCHAR(20) NOT NULL COMMENT '领导电话',
+
+    duty_person VARCHAR(50) NOT NULL COMMENT '值班人员姓名',
+    duty_phone VARCHAR(20) NOT NULL COMMENT '值班电话',
+
+    duty_date DATE NOT NULL COMMENT '值班日期',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    UNIQUE KEY uniq_org_date (org_name, duty_date),
+    INDEX idx_duty_date (duty_date)
+) COMMENT='单位值班安排表';
+CREATE TABLE attack_flyline (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    source_ip VARCHAR(45) NOT NULL COMMENT '攻击源IP',
+    target_ip VARCHAR(45) NOT NULL COMMENT '受害者IP',
+
+    source_location_name VARCHAR(100) COMMENT '攻击源位置名称（如 美国·洛杉矶）',
+    source_lng DECIMAL(10, 6) NOT NULL COMMENT '攻击源经度',
+    source_lat DECIMAL(10, 6) NOT NULL COMMENT '攻击源纬度',
+
+    target_location_name VARCHAR(100) COMMENT '目标位置名称（如 中国·北京）',
+    target_lng DECIMAL(10, 6) NOT NULL COMMENT '目标经度',
+    target_lat DECIMAL(10, 6) NOT NULL COMMENT '目标纬度',
+
+    attack_method VARCHAR(50) NOT NULL COMMENT '攻击形式（如 DDoS、SQL注入）',
+    target_system VARCHAR(100) NOT NULL COMMENT '受攻击系统（如 Windows Server、Linux Nginx）',
+
+    attack_time DATETIME NOT NULL COMMENT '攻击时间',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    INDEX idx_attack_time (attack_time),
+    INDEX idx_source_ip (source_ip),
+    INDEX idx_target_ip (target_ip),
+    INDEX idx_attack_method (attack_method),
+    INDEX idx_target_system (target_system)
+) COMMENT='攻击飞线图事件记录表';
+CREATE TABLE alert_region_stat (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    region_name VARCHAR(100) NOT NULL COMMENT '地区名称（省市名或国家名）',
+    region_type ENUM('domestic', 'foreign') NOT NULL COMMENT '地区类型：domestic为境内，foreign为境外',
+    alert_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '报警数量',
+
+    stat_date DATE NOT NULL COMMENT '统计日期',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+
+    UNIQUE KEY uniq_region_date (region_name, region_type, stat_date),
+    INDEX idx_type_count (region_type, alert_count)
+) COMMENT='按区域（境内/境外）统计的报警数量表';
+CREATE TABLE risk_score (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    system_name VARCHAR(100) NOT NULL COMMENT '系统名称',
+    risk_score DECIMAL(5,2) NOT NULL COMMENT '风险评分（0~100 分）',
+    score_date DATE NOT NULL COMMENT '评分日期',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    UNIQUE KEY uniq_system_date (system_name, score_date),
+    INDEX idx_score_date (score_date)
+) COMMENT='系统风险评分表';
+CREATE TABLE security_event (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    system_name VARCHAR(100) NOT NULL COMMENT '系统名称',
+    ip_address VARCHAR(45) NOT NULL COMMENT '事件涉及的IP地址（IPv4或IPv6）',
+
+    event_time DATETIME NOT NULL COMMENT '事件发生时间',
+
+    status ENUM('handled', 'unhandled') NOT NULL DEFAULT 'unhandled' COMMENT '事件状态：已处置/未处置',
+    source VARCHAR(100) NOT NULL COMMENT '事件来源系统（如 IDS、WAF、审计）',
+    content TEXT NOT NULL COMMENT '事件详细内容或描述',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    INDEX idx_event_time (event_time),
+    INDEX idx_status (status),
+    INDEX idx_ip (ip_address)
+) COMMENT='安全事件记录表';
+CREATE TABLE vulnerability_record (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    system_name VARCHAR(100) NOT NULL COMMENT '系统名称',
+    org_name VARCHAR(100) NOT NULL COMMENT '主管单位',
+    vuln_source VARCHAR(100) NOT NULL COMMENT '漏洞来源（如 扫描、通报、人工发现）',
+    vuln_type VARCHAR(100) NOT NULL COMMENT '漏洞类型（如 SQL注入、弱口令）',
+
+    found_time DATETIME NOT NULL COMMENT '漏洞发现时间',
+
+    fix_content TEXT COMMENT '整改内容或修复说明',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    INDEX idx_severity (severity),
+    INDEX idx_found_time (found_time),
+    INDEX idx_org_system (org_name, system_name)
+) COMMENT='漏洞情况详细记录表';
+CREATE TABLE vulnerability_stat (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    stat_year INT NOT NULL COMMENT '统计年份，例如2025',
+    stat_quarter TINYINT NOT NULL CHECK (stat_quarter BETWEEN 1 AND 4) COMMENT '统计季度（1~4）',
+
+    high_risk_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '高危漏洞数量',
+    medium_risk_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '中危漏洞数量',
+    low_risk_count INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '低危漏洞数量',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+
+    UNIQUE KEY uniq_year_quarter (stat_year, stat_quarter)
+) COMMENT='漏洞扫描季度统计表';
+
+
+
