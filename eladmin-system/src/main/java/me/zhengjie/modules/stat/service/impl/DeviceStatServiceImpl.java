@@ -1,10 +1,15 @@
 package me.zhengjie.modules.stat.service.impl;
 
 import me.zhengjie.modules.stat.domain.DeviceStat;
+import me.zhengjie.modules.stat.dto.DeviceStatQueryCriteria;
 import me.zhengjie.modules.stat.repository.DeviceStatRepository;
 import me.zhengjie.modules.stat.service.DeviceStatService;
+import me.zhengjie.modules.stat.specification.DeviceStatSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -57,5 +62,32 @@ public class DeviceStatServiceImpl extends BaseStatServiceImpl<DeviceStat, Devic
         if (source.getAlarmCount() != null) {
             target.setAlarmCount(source.getAlarmCount());
         }
+    }
+
+    @Override
+    protected Page<DeviceStat> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
+        return repository.findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    protected Page<DeviceStat> findByKeyField(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return repository.findAll(pageable);
+        }
+        // For DeviceStat, search by numeric values in counts
+        try {
+            Integer numericValue = Integer.parseInt(keyword);
+            return repository.findByOnlineCountOrOfflineCountOrAlarmCount(numericValue, numericValue, numericValue, pageable);
+        } catch (Exception e) {
+            return repository.findAll(pageable);
+        }
+    }
+
+    /**
+     * 复杂条件查询
+     */
+    public Page<DeviceStat> findByCriteria(DeviceStatQueryCriteria criteria, Pageable pageable) {
+        Specification<DeviceStat> spec = DeviceStatSpecification.build(criteria);
+        return repository.findAll(spec, pageable);
     }
 } 

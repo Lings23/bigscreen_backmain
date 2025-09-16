@@ -4,6 +4,8 @@ import me.zhengjie.modules.stat.domain.SecurityEvent;
 import me.zhengjie.modules.stat.repository.SecurityEventRepository;
 import me.zhengjie.modules.stat.service.SecurityEventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -52,5 +54,19 @@ public class SecurityEventServiceImpl extends BaseStatServiceImpl<SecurityEvent,
         if (source.getContent() != null) {
             target.setContent(source.getContent());
         }
+    }
+
+    @Override
+    protected Page<SecurityEvent> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
+        return repository.findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    protected Page<SecurityEvent> findByKeyField(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return repository.findAll(pageable);
+        }
+        // Search by system name as the primary key field for SecurityEvent
+        return repository.findBySystemNameContainingIgnoreCase(keyword, pageable);
     }
 } 

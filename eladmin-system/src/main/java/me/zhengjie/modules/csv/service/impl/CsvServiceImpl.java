@@ -182,6 +182,22 @@ public class CsvServiceImpl implements CsvService {
                 valueRows.add("(" + String.join(", ", values) + ")");
             }
             sql.append(String.join(", ", valueRows));
+
+            // 如果是 duty_schedule 表，则添加 ON DUPLICATE KEY UPDATE 子句
+            if ("duty_schedule".equalsIgnoreCase(tableName)) {
+                sql.append(" ON DUPLICATE KEY UPDATE ");
+                List<String> updateSet = new ArrayList<>();
+                for (String col : columns) {
+                    // org_name 和 duty_date 是唯一键，不需要更新
+                    if (!"org_name".equalsIgnoreCase(col) && !"duty_date".equalsIgnoreCase(col)) {
+                        updateSet.add("`" + col + "` = VALUES(`" + col + "`)");
+                    }
+                }
+                // 也更新 updated_at 字段
+                updateSet.add("`updated_at` = VALUES(`updated_at`)");
+                sql.append(String.join(", ", updateSet));
+            }
+
             entityManager.createNativeQuery(sql.toString()).executeUpdate();
             importedCount = data.size();
             

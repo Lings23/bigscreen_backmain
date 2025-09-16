@@ -1,9 +1,14 @@
 package me.zhengjie.modules.stat.service.impl;
 
 import me.zhengjie.modules.stat.domain.AttackFlyline;
+import me.zhengjie.modules.stat.dto.AttackFlylineQueryCriteria;
 import me.zhengjie.modules.stat.repository.AttackFlylineRepository;
 import me.zhengjie.modules.stat.service.AttackFlylineService;
+import me.zhengjie.modules.stat.specification.AttackFlylineSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -70,5 +75,28 @@ public class AttackFlylineServiceImpl extends BaseStatServiceImpl<AttackFlyline,
         if (source.getSourceIsDomestic() != null) {
             target.setSourceIsDomestic(source.getSourceIsDomestic());
         }
+    }
+
+    @Override
+    protected Page<AttackFlyline> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
+        return repository.findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    protected Page<AttackFlyline> findByKeyField(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return repository.findAll(pageable);
+        }
+        // For AttackFlyline, search by source IP, target IP, or attack method
+        return repository.findBySourceIpContainingIgnoreCaseOrTargetIpContainingIgnoreCaseOrAttackMethodContainingIgnoreCase(
+            keyword, keyword, keyword, pageable);
+    }
+
+    /**
+     * 复杂条件查询
+     */
+    public Page<AttackFlyline> findByCriteria(AttackFlylineQueryCriteria criteria, Pageable pageable) {
+        Specification<AttackFlyline> spec = AttackFlylineSpecification.build(criteria);
+        return repository.findAll(spec, pageable);
     }
 } 

@@ -19,12 +19,14 @@ public class DutySchedule {
     private String leaderName;
     @Column(name = "leader_phone", nullable = false)
     private String leaderPhone;
-    @Column(name = "duty_person", nullable = false)
+    @Column(name = "duty_person", nullable = false, length = 1024)
     private String dutyPerson;
-    @Column(name = "duty_phone", nullable = false)
+    @Column(name = "duty_phone", nullable = false, length = 1024)
     private String dutyPhone;
     @Column(name = "duty_date", nullable = false)
     private LocalDate dutyDate;
+    @Column(name = "event_name")
+    private String eventName;
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     @Column(name = "updated_at")

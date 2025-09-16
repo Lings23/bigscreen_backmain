@@ -1,9 +1,14 @@
 package me.zhengjie.modules.stat.service.impl;
 
 import me.zhengjie.modules.stat.domain.AssetStat;
+import me.zhengjie.modules.stat.dto.AssetStatQueryCriteria;
 import me.zhengjie.modules.stat.repository.AssetStatRepository;
 import me.zhengjie.modules.stat.service.AssetStatService;
+import me.zhengjie.modules.stat.specification.AssetStatSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -73,5 +78,36 @@ public class AssetStatServiceImpl extends BaseStatServiceImpl<AssetStat, AssetSt
         if (source.getOsCount() != null) {
             target.setOsCount(source.getOsCount());
         }
+    }
+
+    @Override
+    protected Page<AssetStat> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
+        return repository.findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    protected Page<AssetStat> findByKeyField(String keyword, Pageable pageable) {
+        // For AssetStat, we can search by stat date as the key field
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return repository.findAll(pageable);
+        }
+        // Try to parse as date string and search by stat date
+        try {
+            java.time.LocalDate date = java.time.LocalDate.parse(keyword);
+            return repository.findByStatDate(date, pageable);
+        } catch (Exception e) {
+            return repository.findAll(pageable);
+        }
+    }
+    
+    /**
+     * 根据查询条件进行复杂查询
+     * @param criteria 查询条件
+     * @param pageable 分页参数
+     * @return 分页结果
+     */
+    public Page<AssetStat> findByCriteria(AssetStatQueryCriteria criteria, Pageable pageable) {
+        Specification<AssetStat> spec = AssetStatSpecification.createSpecification(criteria);
+        return repository.findAll(spec, pageable);
     }
 } 

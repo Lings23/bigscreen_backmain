@@ -91,6 +91,9 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>me.zhengjie.AppRun</mainClass>
+                </configuration>
             </plugin>
             <!-- 跳过单元测试 -->
             <plugin>
