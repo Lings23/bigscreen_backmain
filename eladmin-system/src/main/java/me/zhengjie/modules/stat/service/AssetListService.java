@@ -1,11 +1,15 @@
 package me.zhengjie.modules.stat.service;
 
+import me.zhengjie.modules.stat.domain.AssetList;
 import me.zhengjie.modules.stat.dto.AssetListDto;
 import me.zhengjie.modules.stat.dto.AssetListQueryDto;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -99,4 +103,40 @@ public interface AssetListService {
      * @throws IOException IO异常
      */
     void download(HttpServletResponse response) throws IOException;
+
+    // 标准CRUD分页查询接口方法
+    /**
+     * 根据Specification和Pageable查询
+     * @param spec 查询条件
+     * @param pageable 分页信息
+     * @return 分页结果
+     */
+    Page<AssetList> findAll(Specification<AssetList> spec, Pageable pageable);
+
+    /**
+     * 根据时间段查询
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页结果
+     */
+    Page<AssetList> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size);
+
+    /**
+     * 根据关键字查询
+     * @param keyword 关键字
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页结果
+     */
+    Page<AssetList> findByKeyword(String keyword, Integer page, Integer size);
+
+    /**
+     * 创建分页对象
+     * @param page 页码
+     * @param size 每页大小
+     * @return 分页对象
+     */
+    Pageable createPageable(Integer page, Integer size);
 } 

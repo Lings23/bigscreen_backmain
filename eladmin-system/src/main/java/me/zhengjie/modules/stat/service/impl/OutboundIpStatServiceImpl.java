@@ -67,11 +67,31 @@ public class OutboundIpStatServiceImpl extends BaseStatServiceImpl<OutboundIpSta
         return repository.findByLocationContainingIgnoreCase(keyword, pageable);
     }
 
-    /**
-     * 复杂条件查询
-     */
-    public Page<OutboundIpStat> findByCriteria(OutboundIpStatQueryCriteria criteria, Pageable pageable) {
-        Specification<OutboundIpStat> spec = OutboundIpStatSpecification.build(criteria);
+    @Override
+    public Page<OutboundIpStat> findAll(Specification<OutboundIpStat> spec, Pageable pageable) {
         return repository.findAll(spec, pageable);
     }
-} 
+
+    @Override
+    public Page<OutboundIpStat> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<OutboundIpStat> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
+    public Page<OutboundIpStat> findByCriteria(OutboundIpStatQueryCriteria criteria, Pageable pageable) {
+        Specification<OutboundIpStat> spec = OutboundIpStatSpecification.build(criteria);
+        return findAll(spec, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        return super.createPageable(page, size);
+    }
+}

@@ -77,11 +77,31 @@ public class DutyScheduleServiceImpl extends BaseStatServiceImpl<DutySchedule, D
             keyword, keyword, keyword, pageable);
     }
 
-    /**
-     * 复杂条件查询
-     */
+    @Override
+    public Page<DutySchedule> findAll(Specification<DutySchedule> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<DutySchedule> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<DutySchedule> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
     public Page<DutySchedule> findByCriteria(DutyScheduleQueryCriteria criteria, Pageable pageable) {
         Specification<DutySchedule> spec = DutyScheduleSpecification.build(criteria);
-        return repository.findAll(spec, pageable);
+        return findAll(spec, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        return super.createPageable(page, size);
     }
 } 

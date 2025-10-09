@@ -100,14 +100,31 @@ public class AssetStatServiceImpl extends BaseStatServiceImpl<AssetStat, AssetSt
         }
     }
     
-    /**
-     * 根据查询条件进行复杂查询
-     * @param criteria 查询条件
-     * @param pageable 分页参数
-     * @return 分页结果
-     */
-    public Page<AssetStat> findByCriteria(AssetStatQueryCriteria criteria, Pageable pageable) {
-        Specification<AssetStat> spec = AssetStatSpecification.createSpecification(criteria);
+    @Override
+    public Page<AssetStat> findAll(Specification<AssetStat> spec, Pageable pageable) {
         return repository.findAll(spec, pageable);
     }
-} 
+
+    @Override
+    public Page<AssetStat> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<AssetStat> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
+    public Page<AssetStat> findByCriteria(AssetStatQueryCriteria criteria, Pageable pageable) {
+        Specification<AssetStat> spec = AssetStatSpecification.createSpecification(criteria);
+        return findAll(spec, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        return super.createPageable(page, size);
+    }
+}

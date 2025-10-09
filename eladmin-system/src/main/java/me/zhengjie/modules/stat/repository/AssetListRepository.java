@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * 资产列表Repository接口
@@ -46,6 +48,17 @@ public interface AssetListRepository extends JpaRepository<AssetList, Long>, Jpa
      * @return 资产列表
      */
     List<AssetList> findByOrganizationNameContaining(String organizationName);
+
+    /**
+     * 根据关键字搜索资产列表（支持IP、系统名称、所属单位的模糊查询，忽略大小写）
+     * @param assetIp 资产IP关键字
+     * @param systemName 系统名称关键字
+     * @param organizationName 所属单位关键字
+     * @param pageable 分页参数
+     * @return 资产列表分页结果
+     */
+    Page<AssetList> findByAssetIpContainingIgnoreCaseOrSystemNameContainingIgnoreCaseOrOrganizationNameContainingIgnoreCase(
+        String assetIp, String systemName, String organizationName, Pageable pageable);
 
     /**
      * 检查IP和端口组合是否存在

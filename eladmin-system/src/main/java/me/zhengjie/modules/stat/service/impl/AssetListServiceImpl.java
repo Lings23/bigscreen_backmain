@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -220,5 +221,53 @@ public class AssetListServiceImpl implements AssetListService {
         }
         
         response.getWriter().flush();
+    }
+
+    // 标准CRUD分页查询接口方法实现
+    @Override
+    public Page<AssetList> findAll(Specification<AssetList> spec, Pageable pageable) {
+        return assetListRepository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<AssetList> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<AssetList> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        if (page == null || page < 0) {
+            page = 0;
+        }
+        if (size == null || size <= 0) {
+            size = 20;
+        }
+        return PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    }
+
+    /**
+     * 根据创建时间范围查询
+     */
+    protected Page<AssetList> findByCreatedAtBetween(LocalDateTime startTime, LocalDateTime endTime, Pageable pageable) {
+        return assetListRepository.findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    /**
+     * 根据关键字字段查询
+     */
+    protected Page<AssetList> findByKeyField(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return assetListRepository.findAll(pageable);
+        }
+        // For AssetList, search by asset IP, system name, or organization name
+        return assetListRepository.findByAssetIpContainingIgnoreCaseOrSystemNameContainingIgnoreCaseOrOrganizationNameContainingIgnoreCase(
+            keyword, keyword, keyword, pageable);
     }
 } 

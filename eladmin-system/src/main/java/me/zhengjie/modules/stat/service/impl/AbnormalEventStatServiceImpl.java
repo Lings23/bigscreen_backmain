@@ -77,4 +77,11 @@ public class AbnormalEventStatServiceImpl extends BaseStatServiceImpl<AbnormalEv
         Specification<AbnormalEventStat> spec = AbnormalEventStatSpecification.build(criteria);
         return repository.findAll(spec, pageable);
     }
-} 
+    
+    /**
+     * 标准CRUD查询 - 支持动态Specification和Pageable
+     */
+    public Page<AbnormalEventStat> findAll(Specification<AbnormalEventStat> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
+}

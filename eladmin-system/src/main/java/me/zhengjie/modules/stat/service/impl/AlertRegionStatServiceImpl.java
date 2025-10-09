@@ -67,11 +67,31 @@ public class AlertRegionStatServiceImpl extends BaseStatServiceImpl<AlertRegionS
         return repository.findByRegionNameContainingIgnoreCase(keyword, pageable);
     }
 
-    /**
-     * 复杂条件查询
-     */
+    @Override
+    public Page<AlertRegionStat> findAll(Specification<AlertRegionStat> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<AlertRegionStat> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<AlertRegionStat> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
     public Page<AlertRegionStat> findByCriteria(AlertRegionStatQueryCriteria criteria, Pageable pageable) {
         Specification<AlertRegionStat> spec = AlertRegionStatSpecification.build(criteria);
-        return repository.findAll(spec, pageable);
+        return findAll(spec, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        return super.createPageable(page, size);
     }
 } 

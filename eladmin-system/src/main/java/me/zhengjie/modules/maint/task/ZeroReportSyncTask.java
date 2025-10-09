@@ -32,19 +32,19 @@ public class ZeroReportSyncTask {
         }
     }
 
-    /**
-     * 测试方法：应用启动后延迟10秒执行一次同步（仅用于测试）
-     */
-    @Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE)
-    public void testSyncOnStartup() {
-        log.info("=== 应用启动测试：开始执行ZeroReport值班信息同步测试 ===");
-        try {
-            zeroReportSyncService.syncActiveZeroReportDutyScheduled();
-            log.info("=== 应用启动测试：ZeroReport值班信息同步测试完成 ===");
-        } catch (Exception e) {
-            log.error("=== 应用启动测试：ZeroReport值班信息同步测试失败 ===", e);
-        }
-    }
+    // /**
+    //  * 测试方法：应用启动后延迟10秒执行一次同步（仅用于测试）
+    //  */
+    // @Scheduled(initialDelay = 10000, fixedDelay = Long.MAX_VALUE)
+    // public void testSyncOnStartup() {
+    //     log.info("=== 应用启动测试：开始执行ZeroReport值班信息同步测试 ===");
+    //     try {
+    //         zeroReportSyncService.syncActiveZeroReportDutyScheduled();
+    //         log.info("=== 应用启动测试：ZeroReport值班信息同步测试完成 ===");
+    //     } catch (Exception e) {
+    //         log.error("=== 应用启动测试：ZeroReport值班信息同步测试失败 ===", e);
+    //     }
+    // }
 
     // /**
     //  * 手动测试方法：每5分钟执行一次（仅用于测试）

@@ -1,11 +1,14 @@
 package me.zhengjie.modules.stat.service.impl;
 
 import me.zhengjie.modules.stat.domain.SecurityEvent;
+import me.zhengjie.modules.stat.dto.SecurityEventQueryCriteria;
 import me.zhengjie.modules.stat.repository.SecurityEventRepository;
 import me.zhengjie.modules.stat.service.SecurityEventService;
+import me.zhengjie.modules.stat.specification.SecurityEventSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
@@ -68,5 +71,33 @@ public class SecurityEventServiceImpl extends BaseStatServiceImpl<SecurityEvent,
         }
         // Search by system name as the primary key field for SecurityEvent
         return repository.findBySystemNameContainingIgnoreCase(keyword, pageable);
+    }
+
+    @Override
+    public Page<SecurityEvent> findAll(Specification<SecurityEvent> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<SecurityEvent> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByCreatedAtBetween(startTime, endTime, pageable);
+    }
+
+    @Override
+    public Page<SecurityEvent> findByKeyword(String keyword, Integer page, Integer size) {
+        Pageable pageable = createPageable(page, size);
+        return findByKeyField(keyword, pageable);
+    }
+
+    @Override
+    public Page<SecurityEvent> findByCriteria(SecurityEventQueryCriteria criteria, Pageable pageable) {
+        Specification<SecurityEvent> spec = SecurityEventSpecification.createSpecification(criteria);
+        return findAll(spec, pageable);
+    }
+
+    @Override
+    public Pageable createPageable(Integer page, Integer size) {
+        return super.createPageable(page, size);
     }
 } 

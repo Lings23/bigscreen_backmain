@@ -79,4 +79,11 @@ public class AlarmCountStatServiceImpl extends BaseStatServiceImpl<AlarmCountSta
         Specification<AlarmCountStat> spec = AlarmCountStatSpecification.build(criteria);
         return repository.findAll(spec, pageable);
     }
+    
+    /**
+     * 标准CRUD查询 - 支持动态Specification和Pageable
+     */
+    public Page<AlarmCountStat> findAll(Specification<AlarmCountStat> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
 } 

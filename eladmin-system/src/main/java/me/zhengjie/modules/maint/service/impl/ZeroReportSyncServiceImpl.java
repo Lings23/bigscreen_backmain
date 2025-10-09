@@ -185,7 +185,16 @@ public Map<String, Object> syncActiveZeroReportDuty(String databaseId) {
                         while (rs.next()) {
                             Map<String, Object> record = new HashMap<>();
                             record.put("event_id", rs.getLong("event_id"));
-                            record.put("work_date", rs.getDate("work_date").toLocalDate());
+                            
+                            // 处理可能为null的work_date
+                            java.sql.Date workDate = rs.getDate("work_date");
+                            if (workDate != null) {
+                                record.put("work_date", workDate.toLocalDate());
+                            } else {
+                                log.warn("work_date为null，跳过该记录，event_id: {}", rs.getLong("event_id"));
+                                continue; // 跳过这条记录
+                            }
+                            
                             record.put("leader_name", rs.getString("leader_name"));
                             
                             // 电话号码fallback逻辑：优先使用leader_phone，为空时使用leader_call，且都要截断
@@ -213,7 +222,16 @@ public Map<String, Object> syncActiveZeroReportDuty(String databaseId) {
                         while (rs.next()) {
                             Map<String, Object> record = new HashMap<>();
                             record.put("event_id", rs.getLong("event_id"));
-                            record.put("work_date", rs.getDate("work_date").toLocalDate());
+                            
+                            // 处理可能为null的work_date
+                            java.sql.Date workDate = rs.getDate("work_date");
+                            if (workDate != null) {
+                                record.put("work_date", workDate.toLocalDate());
+                            } else {
+                                log.warn("work_date为null，跳过该记录，event_id: {}", rs.getLong("event_id"));
+                                continue; // 跳过这条记录
+                            }
+                            
                             record.put("operator_name", rs.getString("operator_name"));
                             
                             // 电话号码fallback逻辑：优先使用operator_phone，为空时使用operator_call

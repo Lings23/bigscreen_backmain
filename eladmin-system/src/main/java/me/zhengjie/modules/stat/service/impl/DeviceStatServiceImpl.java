@@ -90,4 +90,20 @@ public class DeviceStatServiceImpl extends BaseStatServiceImpl<DeviceStat, Devic
         Specification<DeviceStat> spec = DeviceStatSpecification.build(criteria);
         return repository.findAll(spec, pageable);
     }
-} 
+    
+    /**
+     * 标准CRUD查询 - 支持动态Specification和Pageable
+     */
+    public Page<DeviceStat> findAll(Specification<DeviceStat> spec, Pageable pageable) {
+        return repository.findAll(spec, pageable);
+    }
+    
+    /**
+     * 根据时间范围查询 - 分页版本
+     */
+    public Page<DeviceStat> findByTimePeriod(LocalDateTime startTime, LocalDateTime endTime, Integer page, Integer size) {
+        validatePaginationParams(page, size);
+        Pageable pageable = createPageable(page, size);
+        return repository.findByStatTimeBetween(startTime, endTime, pageable);
+    }
+}
