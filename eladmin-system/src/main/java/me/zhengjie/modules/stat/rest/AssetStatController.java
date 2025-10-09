@@ -140,18 +140,19 @@ public class AssetStatController {
     /**
      * 分页查询所有资产统计数据
      */
-    @ApiOperation("分页查询资产统计数据")
-    @ApiImplicitParams({
-        @ApiImplicitParam(name = "page", value = "页码", defaultValue = "0", dataType = "int"),
-        @ApiImplicitParam(name = "size", value = "页大小(固定20)", defaultValue = "20", dataType = "int")
-    })
-    @GetMapping("/page")
-    public ResponseEntity<PageResult<AssetStat>> getPage(
-            @RequestParam(defaultValue = "0") @Min(0) Integer page,
-            @RequestParam(defaultValue = "20") Integer size) {
-        Page<AssetStat> result = service.findAll(page, size);
-        return ResponseEntity.ok(PageResult.of(result));
-    }
+//    @ApiOperation("分页查询资产统计数据")
+//    @ApiImplicitParams({
+//        @ApiImplicitParam(name = "page", value = "页码", defaultValue = "0", dataType = "int"),
+//        @ApiImplicitParam(name = "size", value = "页大小(固定20)", defaultValue = "20", dataType = "int")
+//    })
+//    @GetMapping("/page")
+//    public ResponseEntity<PageResult<AssetStat>> getPage(
+//            @RequestParam(defaultValue = "0") @Min(0) Integer page,
+//            @RequestParam(defaultValue = "20") Integer size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "statDate"));
+//        Page<AssetStat> result = service.findAll(pageable);
+//        return ResponseEntity.ok(PageResult.of(result));
+//    }
     
     /**
      * 按时间段查询资产统计数据

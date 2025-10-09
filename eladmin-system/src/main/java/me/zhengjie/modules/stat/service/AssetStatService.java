@@ -13,7 +13,9 @@ public interface AssetStatService extends BaseStatService<AssetStat> {
      * 根据Specification查询分页数据
      */
     Page<AssetStat> findAll(Specification<AssetStat> spec, Pageable pageable);
-    
+
+
+
     /**
      * 根据时间范围查询分页数据
      */
