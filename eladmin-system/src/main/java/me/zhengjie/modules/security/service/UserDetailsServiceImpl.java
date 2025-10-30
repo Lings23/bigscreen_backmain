@@ -49,7 +49,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             if (user == null) {
                 throw new BadRequestException("用户不存在");
             } else {
-                if (!user.getEnabled()) {
+                if (user.getEnabled() == null || !user.getEnabled()) {
                     throw new BadRequestException("账号未激活！");
                 }
                 // 获取用户的权限

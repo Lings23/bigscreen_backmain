@@ -19,6 +19,8 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.Setter;
 import me.zhengjie.base.BaseEntity;
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -96,6 +98,7 @@ public class User extends BaseEntity implements Serializable {
 
     @NotNull
     @ApiModelProperty(value = "是否启用")
+
     private Boolean enabled;
 
     @ApiModelProperty(value = "是否为admin账号", hidden = true)

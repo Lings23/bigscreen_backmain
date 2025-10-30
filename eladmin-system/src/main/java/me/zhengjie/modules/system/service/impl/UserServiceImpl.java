@@ -29,6 +29,8 @@ import me.zhengjie.modules.system.service.UserService;
 import me.zhengjie.modules.system.service.dto.*;
 import me.zhengjie.modules.system.service.mapstruct.UserMapper;
 import me.zhengjie.utils.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final RedisUtils redisUtils;
     private final UserCacheManager userCacheManager;
     private final OnlineUserService onlineUserService;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public PageResult<UserDto> queryAll(UserQueryCriteria criteria, Pageable pageable) {
