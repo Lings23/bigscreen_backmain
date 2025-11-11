@@ -41,4 +41,49 @@ CREATE TABLE vulnerability_fix_stat (
     UNIQUE KEY uniq_stat_time (stat_time)
 ) COMMENT='漏洞修复情况统计表';
 
+CREATE TABLE re_bao_event (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    event_name VARCHAR(200) NOT NULL COMMENT '事件名称',
+    participating_units VARCHAR(500) NOT NULL COMMENT '参与单位，多个单位用逗号分隔',
+    start_time DATETIME NOT NULL COMMENT '事件开始时间',
+    end_time DATETIME NOT NULL COMMENT '事件结束时间',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    INDEX idx_start_time (start_time),
+    INDEX idx_end_time (end_time)
+) COMMENT='重保事件记录表';
+
+CREATE TABLE quarterly_report (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    report_quarter VARCHAR(20) NOT NULL COMMENT '报告季度，格式如2024-Q1',
+    security_retrieval_count INT NOT NULL DEFAULT 0 COMMENT '信息安全检索数量',
+    security_training_count INT NOT NULL DEFAULT 0 COMMENT '信息安全培训数量',
+    system_rectification_count INT NOT NULL DEFAULT 0 COMMENT '信息系统建设整改数量',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    UNIQUE INDEX uk_quarter (report_quarter) COMMENT '季度唯一索引，防止重复统计'
+) COMMENT='安全季报统计表';
+
+CREATE TABLE attack_stats (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+
+    malicious_code_attack INT NOT NULL DEFAULT 0 COMMENT '恶意代码攻击数量',
+    vulnerability_attack INT NOT NULL DEFAULT 0 COMMENT '漏洞攻击数量',
+    dos_attack INT NOT NULL DEFAULT 0 COMMENT '拒绝服务攻击数量',
+    scan_probe INT NOT NULL DEFAULT 0 COMMENT '扫描探测数量',
+    other_attack INT NOT NULL DEFAULT 0 COMMENT '其他类型攻击数量',
+    stat_date DATETIME NOT NULL COMMENT '统计日期',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+
+    INDEX idx_stat_date (stat_date) COMMENT '按统计日期查询索引'
+) COMMENT='恶意IP攻击统计表';
+
 
